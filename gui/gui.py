@@ -1,11 +1,11 @@
 import pygame
 import sys
-
+from multiprocessing import Queue, Process, Pool
 import events
 import const
 
 
-def visualize_journey(grid_size: int):
+def visualize_journey(grid_size: int, event_queue: Queue = None):
 
     def get_optimal_tile_size(grid_size: int, initial_tile_size: int):
         info = pygame.display.Info()
@@ -35,8 +35,13 @@ def visualize_journey(grid_size: int):
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-            elif event.type == events.UPDATE:
-                draw_route(surface, event.route)
+
+            if event_queue is not None:
+                # todo: line needs to be removed before each rendering,
+                # todo: this needs to run smoother
+                if event_queue.qsize() > 0:
+                    new_event = event_queue.get()
+                    draw_route(surface, new_event)
 
             pygame.display.update()
 
@@ -60,6 +65,11 @@ def visualize_journey(grid_size: int):
 
         for step1, step2 in zip(path[:-1], path[1:]):
             draw_line(surface, (step1.row, step1.col), (step2.row, step2.col))
+
+    class Line(pygame.sprite.Sprite):
+        def __init__(self, path: list):
+            pygame.sprite.Sprite.__init__(self)
+
 
     pygame.display.init()
     tile_size = get_optimal_tile_size(grid_size, const.TILE_SIZE)

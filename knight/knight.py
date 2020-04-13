@@ -1,8 +1,11 @@
 from board_graph import Graph
 from field import Field
+from gui.gui import visualize_journey
+import gui.events
+from multiprocessing import Process, Queue
 
 
-def find_path(board: Graph, heuristic=lambda x: x):
+def find_path(board: Graph, heuristic=lambda x: x, events_queue: Queue = None):
     total_squares = board.board_size ** 2
 
     def first_true(sequence):
@@ -15,6 +18,9 @@ def find_path(board: Graph, heuristic=lambda x: x):
         return field.row * board.board_size + 1 + field.col
 
     def traverse(path: list, current_field: Field):
+        if events_queue:
+            events_queue.put(path)
+
         if len(path) + 1 == total_squares:  # end of a journey, all fields visited
             path.append(current_field)
             for field in path:
@@ -33,4 +39,8 @@ def find_path(board: Graph, heuristic=lambda x: x):
 
 if __name__ == '__main__':
     board = Graph(6)
-    find_path(board)
+    q = Queue()
+    visualization = Process(target=visualize_journey, args=(6, (q),))
+    visualization.start()
+    find_path(board, events_queue=q)
+    visualization.join()
