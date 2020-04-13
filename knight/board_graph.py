@@ -1,4 +1,3 @@
-from collections import defaultdict
 from typing import Generator
 
 from field_node import FieldNode
