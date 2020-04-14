@@ -25,10 +25,10 @@ def visualize_journey(grid_size: int, event_queue: Queue = None):
         return surface
 
     def game_loop(surface, grid_size: int):
-        result_available = False
+        poll_events = True
         draw_grid(surface, grid_size)
         while True:
-            event = pygame.event.poll()
+            event = pygame.event.poll() if poll_events else pygame.event.wait()
             if event.type == pygame.NOEVENT:
                 if event_queue is not None:
                     if event_queue.qsize() > 0:
@@ -37,8 +37,8 @@ def visualize_journey(grid_size: int, event_queue: Queue = None):
                             draw_grid(surface, grid_size)
                             draw_route(surface, new_event.get('path'))
                             pygame.time.wait(10)
-                        elif 'result_available' in new_event:
-                            result_available = new_event.get('result_available')
+                            if len(new_event.get('path')) == grid_size ** 2:
+                                poll_events = False
             elif event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
@@ -56,6 +56,7 @@ def visualize_journey(grid_size: int, event_queue: Queue = None):
 
                         draw_grid(surface, grid_size)
                         draw_route(surface, last_event.get('path', []))
+                        poll_events = False
 
             pygame.display.update()
 
