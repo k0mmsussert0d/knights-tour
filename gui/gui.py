@@ -25,23 +25,37 @@ def visualize_journey(grid_size: int, event_queue: Queue = None):
         return surface
 
     def game_loop(surface, grid_size: int):
+        result_available = False
         draw_grid(surface, grid_size)
         while True:
-            event = pygame.event.wait()
-            if event.type == pygame.QUIT:
+            event = pygame.event.poll()
+            if event.type == pygame.NOEVENT:
+                if event_queue is not None:
+                    if event_queue.qsize() > 0:
+                        new_event = event_queue.get()
+                        if 'path' in new_event:
+                            draw_grid(surface, grid_size)
+                            draw_route(surface, new_event.get('path'))
+                            pygame.time.wait(10)
+                        elif 'result_available' in new_event:
+                            result_available = new_event.get('result_available')
+            elif event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
+                elif event.key == pygame.K_f:
+                    if event_queue is not None and event_queue.qsize() > 0:
+                        draw_text_msg(surface, 'Discarding steps...')
+                        pygame.display.update()
+                        last_event = {}
+                        while len(last_event.get('path', [])) != grid_size ** 2:  # retrieve the full path
+                            last_event = event_queue.get()
 
-            if event_queue is not None:
-                # todo: line needs to be removed before each rendering,
-                # todo: this needs to run smoother
-                if event_queue.qsize() > 0:
-                    new_event = event_queue.get()
-                    draw_route(surface, new_event)
+                        draw_grid(surface, grid_size)
+                        draw_route(surface, last_event.get('path', []))
 
             pygame.display.update()
 
@@ -66,12 +80,13 @@ def visualize_journey(grid_size: int, event_queue: Queue = None):
         for step1, step2 in zip(path[:-1], path[1:]):
             draw_line(surface, (step1.row, step1.col), (step2.row, step2.col))
 
-    class Line(pygame.sprite.Sprite):
-        def __init__(self, path: list):
-            pygame.sprite.Sprite.__init__(self)
-
+    def draw_text_msg(surface: pygame.Surface, text: str):
+        text_msg = pygame.font.SysFont('Cantarell', 30)
+        text_surface = text_msg.render(text, False, const.COLOR_TEXT_MSG)
+        surface.blit(text_surface, (0,0))
 
     pygame.display.init()
+    pygame.font.init()
     tile_size = get_optimal_tile_size(grid_size, const.TILE_SIZE)
     surface = window_init(grid_size)
     game_loop(surface, grid_size)
