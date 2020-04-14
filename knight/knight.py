@@ -4,7 +4,10 @@ from gui.gui import visualize_journey
 from multiprocessing import Process, Queue
 
 
-def find_path(board: Graph, heuristic=lambda x: x, events_queue: Queue = None):
+def find_path(
+        board: Graph, start_field: Field = Field(0, 0),
+        heuristic=lambda x: x, events_queue: Queue = None
+):
     total_squares = board.board_size ** 2
 
     def first_true(sequence):
@@ -22,8 +25,6 @@ def find_path(board: Graph, heuristic=lambda x: x, events_queue: Queue = None):
 
         if len(path) + 1 == total_squares:  # end of a journey, all fields visited
             path.append(current_field)
-            for field in path:
-                print(field_number(field), end=' ')
             if events_queue:
                 events_queue.close()
             return path
@@ -35,14 +36,4 @@ def find_path(board: Graph, heuristic=lambda x: x, events_queue: Queue = None):
         next_fields = sorted(available_fields, key=heuristic)
         return first_true(traverse(path + [current_field], field) for field in next_fields)
 
-    return traverse([], Field(0, 0))
-
-
-if __name__ == '__main__':
-    board = Graph(6)
-    q = Queue()
-    visualization = Process(target=visualize_journey, args=(6, (q),))
-    visualization.daemon = True
-    visualization.start()
-    find_path(board, events_queue=q)
-    visualization.join()
+    return traverse([], start_field)
