@@ -1,7 +1,6 @@
 import pygame
 import sys
-from multiprocessing import Queue, Process, Pool
-import events
+from multiprocessing import Queue
 import const
 
 
