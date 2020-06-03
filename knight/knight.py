@@ -1,7 +1,6 @@
-from board_graph import Graph
-from field import Field
-from gui.gui import visualize_journey
-from multiprocessing import Process, Queue
+from .board_graph import Graph
+from .field import Field
+from multiprocessing import Queue
 
 
 def find_path(
@@ -15,9 +14,6 @@ def find_path(
         If no true value is found, returns None.
         """
         return next(filter(None, sequence), None)
-
-    def field_number(field: Field):
-        return field.row * board.board_size + 1 + field.col
 
     def traverse(path: list, current_field: Field):
         if events_queue:

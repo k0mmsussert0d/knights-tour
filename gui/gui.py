@@ -1,7 +1,7 @@
 import pygame
 import sys
 from multiprocessing import Queue
-import const
+from . import const
 
 
 def visualize_journey(grid_size: int, event_queue: Queue = None):
@@ -78,7 +78,7 @@ def visualize_journey(grid_size: int, event_queue: Queue = None):
             pygame.draw.line(surface, const.COLOR_PATH_LINE, start_pos, end_pos, 5)
 
         for step1, step2 in zip(path[:-1], path[1:]):
-            draw_line(surface, (step1.row, step1.col), (step2.row, step2.col))
+            draw_line(surface, (step1.col, step1.row), (step2.col, step2.row))
 
     def draw_text_msg(surface: pygame.Surface, text: str):
         text_msg = pygame.font.SysFont('Cantarell', 30)

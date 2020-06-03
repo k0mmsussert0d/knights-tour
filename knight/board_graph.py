@@ -1,7 +1,7 @@
 from typing import Generator
 
-from field_node import FieldNode
-from field import Field
+from .field_node import FieldNode
+from .field import Field
 
 
 class Graph:

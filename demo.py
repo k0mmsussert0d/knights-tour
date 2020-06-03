@@ -1,9 +1,10 @@
+from multiprocessing import Process, Queue
+from typing import Callable
+
 from knight.knight import find_path
 from knight.board_graph import Graph
 from knight.field import Field
 from gui.gui import visualize_journey
-from multiprocessing import Process, Queue
-from typing import Callable
 
 
 def knights_tour(
@@ -36,7 +37,15 @@ def knights_tour(
     if visualize:
         visualization.join()
 
-    return res
+    return print_order_matrix(res, board_size)
+
+
+def print_order_matrix(fields: list, size: int):
+    for i in range(size):
+        for j in range(size):
+            field = Field(i, j)
+            print(fields.index(field) + 1, end=' ')
+        print()
 
 
 if __name__ == '__main__':
